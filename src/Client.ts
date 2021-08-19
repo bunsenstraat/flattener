@@ -3,6 +3,7 @@ import { createClient } from "@remixproject/plugin-webview";
 import { BehaviorSubject } from "rxjs";
 import { getDependencyGraph, concatSourceFiles } from "./functions";
 import copy from 'copy-to-clipboard'
+import { customAction, customActionType } from "@remixproject/plugin-api";
 
 export class FlattenerPlugin extends PluginClient {
   callBackEnabled: boolean = true;
@@ -12,11 +13,12 @@ export class FlattenerPlugin extends PluginClient {
   filePath: string = "";
   compilationResult: any;
   flattenedSources: any;
+  flattenSwitch: boolean = true;
 
   constructor() {
     super();
     createClient(this);
-    this.methods = ["flattenAndSave", "flatten"];
+    this.methods = ["flattenAndSave", "flatten", "flattenFile"];
     this.onload()
       .then(async (x) => {
       await this.setCallBacks();
@@ -31,16 +33,32 @@ export class FlattenerPlugin extends PluginClient {
     this.on(
       "solidity",
       "compilationFinished",
-      function (target, source, version, data) {
+      async function (target, source, version, data) {
         console.log("compile finished", target, source, version, data);
         client.emit('statusChanged', { key: 'none' })
         client.filePath = target;
         client.compilationResult = { data, source };
         client.fileName.next(target)
         console.log(client.compilationResult)
+        if (client.flattenSwitch) {
+          client.flattenSwitch = false
+          await client.flattenAndSave(null)
+        }
       }
     );
 
+  }
+
+  async flattenFile(action: customAction) {
+    if(!action.path[0]) return
+    const file = action.path[0]
+    try {
+      await this.call('fileManager', 'readFile', file)
+    } catch (e) {
+      this.feedback.next(`${file} does not exist!`)
+    }
+    this.flattenSwitch = true
+    await this.call('solidity', 'compile', file)
   }
 
   async flattenAndSave(res: any) {
@@ -86,6 +104,7 @@ export class FlattenerPlugin extends PluginClient {
     const path = await this._saveFile(this.filePath, this.flattenedSources);
     this.emit('statusChanged', { key: 'succeed', type: 'success', title: 'File saved' });
     this.feedback.next('File saved');
+    await this.call('fileManager', 'open', path)
     return path;
   }
   
