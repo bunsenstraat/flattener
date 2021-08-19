@@ -18,7 +18,7 @@ export class FlattenerPlugin extends PluginClient {
   constructor() {
     super();
     createClient(this);
-    this.methods = ["flattenAndSave", "flatten", "flattenFile"];
+    this.methods = ["flattenAndSave", "flatten", "flattenFile", "flattenFileCustomAction"];
     this.onload()
       .then(async (x) => {
       await this.setCallBacks();
@@ -49,9 +49,12 @@ export class FlattenerPlugin extends PluginClient {
 
   }
 
-  async flattenFile(action: customAction) {
+  async flattenFileCustomAction(action: customAction) {
     if(!action.path[0]) return
-    const file = action.path[0]
+    await this.flattenFile(action.path[0])
+  }
+
+  async flattenFile(file: string) {
     try {
       await this.call('fileManager', 'readFile', file)
     } catch (e) {
