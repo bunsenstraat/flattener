@@ -3,7 +3,7 @@ import { createClient } from "@remixproject/plugin-webview";
 import { BehaviorSubject } from "rxjs";
 import { getDependencyGraph, concatSourceFiles } from "./functions";
 import copy from 'copy-to-clipboard'
-import { customAction, customActionType } from "@remixproject/plugin-api";
+import { customAction } from "@remixproject/plugin-api";
 
 export class FlattenerPlugin extends PluginClient {
   callBackEnabled: boolean = true;
