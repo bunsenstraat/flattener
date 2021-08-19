@@ -1,4 +1,5 @@
 const IMPORT_SOLIDITY_REGEX = /^\s*import(\s+).*$/gm;
+const SPDX_SOLIDITY_REGEX = /^\s*\/\/ SPDX-License-Identifier:.*$/gm;
 
 export function getDependencyGraph(ast, target) {
 	const graph = tsort();
@@ -14,8 +15,9 @@ export function concatSourceFiles(files, sources) {
 	for (const file of files) {
 		const source = sources[file].content;
 		const sourceWithoutImport = source.replace(IMPORT_SOLIDITY_REGEX, '');
+		const sourceWithoutSPDX = sourceWithoutImport.replace(SPDX_SOLIDITY_REGEX, '');
 		concat += `\n// File: ${file}\n\n`;
-		concat += sourceWithoutImport;
+		concat += sourceWithoutSPDX;
 	}
 	return concat;
 }
