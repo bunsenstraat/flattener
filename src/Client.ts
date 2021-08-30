@@ -13,7 +13,7 @@ export class FlattenerPlugin extends PluginClient {
   filePath: string = "";
   compilationResult: any;
   flattenedSources: any;
-  flattenSwitch: boolean = true;
+  flattenSwitch: boolean = false;
 
   constructor() {
     super();
@@ -24,7 +24,6 @@ export class FlattenerPlugin extends PluginClient {
       await this.setCallBacks();
       })
       .catch(async (e) => {
-        console.log("FLATTENER: ERROR CONNECTING", e);
       });
   }
 
@@ -34,12 +33,10 @@ export class FlattenerPlugin extends PluginClient {
       "solidity",
       "compilationFinished",
       async function (target, source, version, data) {
-        console.log("compile finished", target, source, version, data);
         client.emit('statusChanged', { key: 'none' })
         client.filePath = target;
         client.compilationResult = { data, source };
         client.fileName.next(target)
-        console.log(client.compilationResult)
         if (client.flattenSwitch) {
           client.flattenSwitch = false
           await client.flattenAndSave(null)
@@ -80,7 +77,6 @@ export class FlattenerPlugin extends PluginClient {
     const sources = this.compilationResult.source.sources;
     // Process
     const dependencyGraph = getDependencyGraph(ast, this.filePath);
-    console.log(dependencyGraph)
     const sortedFiles = dependencyGraph.isEmpty()
         ? [this.filePath]
         : dependencyGraph.sort().reverse();
@@ -90,7 +86,6 @@ export class FlattenerPlugin extends PluginClient {
     this.emit('statusChanged', { key: 'succeed', type: 'success', title: 'Contract flattened' })
     this.feedback.next('Flattened contract copied to clipboard');
     await this._updateSaveButton(this.filePath)
-    console.log("update button ", this.filePath)
     copy(this.flattenedSources)
   }
 
