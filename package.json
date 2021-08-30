@@ -2,6 +2,7 @@
   "name": "plugintester",
   "version": "0.1.0",
   "private": true,
+  "homepage": ".",
   "dependencies": {
     "@3id/connect": "^0.1.2",
     "@ceramicnetwork/http-client": "^0.10.2",
