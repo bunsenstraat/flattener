@@ -28,7 +28,7 @@ function _traverse(graph, visited, ast, name) {
 	for (const dependency of dependencies) {
 		const path = resolve(name, dependency);
 		if (path in visited) {
-			continue;
+			//continue;
 		}
 		visited[path] = 1;
 		graph.add(name, path);
