@@ -24,7 +24,7 @@ export class FlattenerPlugin extends PluginClient {
       await this.setCallBacks();
       })
       .catch(async (e) => {
-      });
+    });
   }
 
   async setCallBacks() {
